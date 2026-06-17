@@ -3,17 +3,28 @@ kind: Ingress
 metadata:
   name: codespace-ingress
   labels:
-    app.kubernetes.io/name:  codespace-ingress
+    app.kubernetes.io/name: codespace-ingress
+
 spec:
   ingressClassName: nginx
   rules:
-   - http:
+    - http:
+        paths:
+          - path: /api/sandbox
+            pathType: Prefix
+            backend:
+              service:
+                name: sandbox-service
+                port:
+                  number: 80
 
-      paths:
-      - pathType: Prefix
-        path: "/api/sandbox"
-        backend:
-          service:
-            name: sandbox-service
-            port: 
-              number: 80
+    - host: "*.preview.localhost"
+      http:
+        paths:
+          - path: "/"
+            pathType: Prefix
+            backend:
+              service:
+                name: router-service
+                port:
+                  number: 80

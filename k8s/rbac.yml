@@ -19,7 +19,7 @@ metadata:
   name: resource-manager
 subjects:
 - kind: ServiceAccount
-  name: resource-manager
+  name: resource-manager  
   namespace: default
 roleRef:
   kind: ClusterRole
