@@ -10,6 +10,26 @@ export async function createPod(sandoxId) {
             }
         },
         spec: {
+            volumes: [
+                {
+                    name: "workspace-volume",
+                    emptyDir: {}
+                }
+            ],
+            initContainers: [
+                {
+                    image: "template",
+                    imagePullPolicy: "IfNotPresent",
+                    name: "init-container",
+                    command: ["sh", "-c", "cp -r /workspace/.  /seed/"],
+                    volumeMounts: [
+                        {
+                            name: "workspace-volume",
+                            mountPath: "/seed"
+                        }
+                    ]
+                }
+            ],
             containers: [
                 {
                     image: "template",
@@ -30,14 +50,49 @@ export async function createPod(sandoxId) {
                             cpu: '250m',
                             memory: '256Mi'
                         }
-                    }
+                    },
+                    volumeMounts: [
+                        {
+                            name: "workspace-volume",
+                            mountPath: "/workspace"
+                        }
+                    ]
+                },
+
+
+
+
+                {
+                    image: "agent",
+                    imagePullPolicy: "IfNotPresent",
+                    name: "agent-container",
+                    ports: [
+                        {
+                            containerPort: 3000, name: "http"
+                        }],
+                    resources: {
+                        limits: {
+                            cpu: '500m', memory: '1Gi'
+                        },
+                        requests: {
+                            cpu: '250m', memory: '500Mi'
+                        }
+                    },
+                    volumeMounts: [
+                        {
+                            name: "workspace-volume",
+                            mountPath: "/workspace"
+                        }
+                    ]
                 }
+
             ]
+
         }
     }
     const response = await k8sCoreV1Api.createNamespacedPod({
-        namespace:"default",
-        body:podManifest
+        namespace: "default",
+        body: podManifest
     })
 
     return response
